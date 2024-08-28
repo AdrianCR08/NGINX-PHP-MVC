@@ -1,0 +1,34 @@
+## This file is the configutarion file needed to run the project in an nginx server
+
+## It must be placed in the sites-enabled folder
+
+server {
+       listen 81;
+       listen [::]:81;
+
+       server_name localhost;
+
+       root /var/www/mvc/;
+
+
+       index index.php info.php index.html;
+       autoindex on;
+
+       rewrite ^/([a-zA-Z0-9]+)$ /index.php?controller=$1 last;
+       rewrite ^/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)$ /index.php?controller=$1&action=$2 last;
+
+
+	 # Location block for serving files directly
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    # Location block for handling PHP files
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
